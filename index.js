@@ -1,7 +1,7 @@
 var redisUtil = require('./redisUtil');
 
 /**
- * 保存redis，并设置过期时间
+ * 保存redis，并设置过期时间，过期时间为秒
  */
 redisUtil.client().setex('key', ExpireTime, 'value', callback);
 
