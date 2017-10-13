@@ -81,3 +81,40 @@ redisUtil.client().del('USER_SHARE_RED_PACKET', function(err) {
 redisUtil.client().lpop('USER_SHARE_RED_PACKET', function(err, ret) {
     return ret; // 5
 });
+
+
+/**
+ * redis 发布和订阅
+ */
+const ROOM_END_RESULT = 'ROOM_END_RESULT';
+
+redisUtil.client().subscribe(ROOM_END_RESULT, function(err) {
+    if (err) {
+        logger.error(err);
+        return;
+    }
+    logger.info('监听队列：', ROOM_END_RESULT);
+});
+
+redisUtil.client().on('message', function(channel, message) {
+    logger.info('[' + channel + ']', message);
+    
+    switch (channel) {
+        case ROOM_END_RESULT:
+            try {
+                var obj = JSON.parse(message);
+                if (obj) {
+                    modules.room.roomManager.onMessage(obj.roomid, obj.creatorid, obj.result);
+                }
+            } catch (e) {
+                logger.error(e);
+            }
+            break;
+        default:
+            break;
+    }
+});
+
+
+//发布
+redisUtil.client().publish(channel, message);
